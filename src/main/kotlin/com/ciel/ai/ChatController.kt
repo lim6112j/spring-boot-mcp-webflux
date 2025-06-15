@@ -6,6 +6,7 @@ import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
 
 data class ChatRequest(val message: String)
 data class ChatResponse(val response: String)
@@ -31,6 +32,6 @@ class ChatController(
             val response = chatClient.prompt(request.message).call().content() ?: "No response generated"
             logger.info { "Generated response: $response" }
             ChatResponse(response)
-        }
+        }.subscribeOn(Schedulers.boundedElastic())
     }
 }
