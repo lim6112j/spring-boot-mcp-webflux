@@ -4,6 +4,8 @@ import io.modelcontextprotocol.client.McpSyncClient
 import mu.KotlinLogging
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider
+import org.springframework.core.io.ClassPathResource
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
@@ -25,6 +27,12 @@ class ChatController(
             .build()
     }
 
+    @GetMapping("/", produces = [MediaType.TEXT_HTML_VALUE])
+    fun index(): Mono<String> {
+        return Mono.fromCallable {
+            ClassPathResource("static/index.html").inputStream.bufferedReader().use { it.readText() }
+        }.subscribeOn(Schedulers.boundedElastic())
+    }
 
     @PostMapping("/chat")
     fun chat(@RequestBody request: ChatRequest): Mono<ChatResponse> {
