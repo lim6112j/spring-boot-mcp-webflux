@@ -28,7 +28,7 @@ class ChatController(
     fun chat(@RequestBody request: ChatRequest): Mono<ChatResponse> {
         return Mono.fromCallable {
             logger.info { "Received chat request: ${request.message}" }
-            val response = chatClient.prompt(request.message).call().content()
+            val response = chatClient.prompt(request.message).call().content() ?: "No response generated"
             logger.info { "Generated response: $response" }
             ChatResponse(response)
         }
