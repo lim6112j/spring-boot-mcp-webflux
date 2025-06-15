@@ -1,8 +1,7 @@
 package com.ciel.ai
 
 import io.modelcontextprotocol.client.McpSyncClient
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import mu.KotlinLogging
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider
 import org.springframework.boot.CommandLineRunner
@@ -12,22 +11,26 @@ import org.springframework.context.annotation.Bean
 
 @SpringBootApplication
 class AiApplication {
-  private val logger: Logger = LoggerFactory.getLogger(AiApplication::class.java)
+  private val logger = KotlinLogging.logger {}
   @Bean
   fun predefinedQuestions(
           chatClientBuilder: ChatClient.Builder,
           mcpSyncClients: List<McpSyncClient>
   ): CommandLineRunner {
     return CommandLineRunner { args ->
-      val chatClient =
-              chatClientBuilder
-                      .defaultToolCallbacks(SyncMcpToolCallbackProvider(mcpSyncClients))
-                      .build()
+      try {
+        val chatClient =
+                chatClientBuilder
+                        .defaultToolCallbacks(SyncMcpToolCallbackProvider(mcpSyncClients))
+                        .build()
 
-      val question =
-              "Does Spring AI supports the Model Context Protocol? Please provide some references."
-      logger.info("QUESTION: {}\n", question)
-      logger.info("ASSISTANT: {}\n", chatClient.prompt(question).call().content())
+        val question =
+                "Does Spring AI supports the Model Context Protocol? Please provide some references."
+        logger.info { "QUESTION: $question" }
+        logger.info { "ASSISTANT: ${chatClient.prompt(question).call().content()}" }
+      } catch (e: Exception) {
+        logger.error(e) { "Error in predefined questions: ${e.message}" }
+      }
     }
   }
 }
